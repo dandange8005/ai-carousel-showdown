@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Process Tips Carousel — Editorial Edition</title>
+
+  <!--
+    ============================================================
+    CAROUSEL V2 — "Editorial Warmth" Edition
+    ============================================================
+    Differences from V1 (claude.html):
+
+    TYPOGRAPHY
+    • V1: system fonts (-apple-system, BlinkMacSystemFont)
+    • V2: Google Fonts — "Instrument Serif" italic for headings,
+           "DM Sans" for body. Creates an editorial magazine feel.
+
+    COLOR & ATMOSPHERE
+    • V1: flat #2b2b2b dark background
+    • V2: deep navy (#16161a) with layered radial gradients
+           for depth + SVG noise grain overlay for texture.
+           Warm cream card (#faf7f2) instead of pure white.
+
+    ICON TREATMENT
+    • V1: bare emoji
+    • V2: emoji inside an organic "blob" frame with a coral
+           (#e06050) border + dashed outer ring, evoking the
+           hand-drawn illustration style from the reference.
+
+    ARROWS
+    • V1: plain text chevrons (‹ ›) in filled circles
+    • V2: SVG chevron icons. Prev is muted dark, Next is cream
+           with shadow — asymmetric styling guides the user forward.
+
+    PAGINATION
+    • V1: simple numbered dots with border on active
+    • V2: numbered dots connected by a thin horizontal line
+           with a green progress fill that advances as you
+           navigate — reinforces the "process" concept.
+
+    ANIMATION
+    • V1: none (instant content display)
+    • V2: staggered content reveal (badge → title → icon → text)
+           each time a slide enters, plus a page-load entrance
+           animation on the whole carousel.
+
+    LAYOUT
+    • V1: 720px max, 48px arrows
+    • V2: 740px max, 52px arrows, more generous padding,
+           refined spacing hierarchy.
+    ============================================================
+  -->
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    /* --- Design tokens --- */
+    :root {
+      --bg: #16161a;                    /* deep navy-ink (V1 was flat #2b2b2b) */
+      --card: #faf7f2;                  /* warm cream (V1 was pure #fff) */
+      --accent: #0d8065;                /* deep teal green */
+      --accent-glow: #0d806540;         /* teal with alpha for badge shadow */
+      --coral: #e06050;                 /* organic icon frame color (new in V2) */
+      --ink: #1e1e22;
+      --muted: #7a7a85;
+      --cream: #f0ece4;                 /* arrow bg, warm off-white */
+      --radius: 18px;                   /* V1 was 14px */
+    }
+
+    /* --- Base --- uses DM Sans (V1 used system fonts) --- */
+    body {
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 32px 20px;
+      color: var(--ink);
+      /* Layered radial gradients for atmospheric depth (V1 was flat color) */
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 80%, #1a2a3a 0%, transparent 50%),
+        radial-gradient(ellipse 70% 50% at 85% 20%, #2a1a2e 0%, transparent 50%),
+        var(--bg);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* SVG noise grain overlay for texture (not in V1) */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.7' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.035'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ===== CAROUSEL GRID LAYOUT ===== */
+    .carousel {
+      position: relative;
+      z-index: 1;
+      max-width: 740px;       /* V1: 720px */
+      width: 100%;
+      display: grid;
+      grid-template-columns: 52px 1fr 52px;  /* V1: 48px */
+      align-items: center;
+      gap: 20px;
+      /* Page-load entrance animation (not in V1) */
+      animation: carouselIn .7s cubic-bezier(.22,1,.36,1) both;
+    }
+
+    @keyframes carouselIn {
+      from { opacity: 0; transform: translateY(30px) scale(.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* ===== VIEWPORT & TRACK ===== */
+    .carousel__viewport {
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--radius);
+      background: var(--card);    /* warm cream vs V1 pure white */
+      /* Layered shadow for depth (V1 had single box-shadow) */
+      box-shadow:
+        0 2px 0 0 rgba(255,255,255,.06),
+        0 24px 64px -12px rgba(0,0,0,.5),
+        0 0 0 1px rgba(255,255,255,.04);
+    }
+
+    .carousel__track {
+      display: flex;
+      /* Smoother easing curve (V1 used .4,0,.2,1) */
+      transition: transform .5s cubic-bezier(.22, 1, .36, 1);
+      will-change: transform;
+    }
+
+    /* ===== INDIVIDUAL SLIDE ===== */
+    .slide {
+      min-width: 100%;
+      padding: 52px 60px 56px;    /* more generous than V1 */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    /* Tip badge — adds glow shadow (V1 had flat badge) */
+    .slide__badge {
+      background: var(--accent);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 7px 22px;
+      border-radius: 24px;
+      letter-spacing: .8px;
+      text-transform: uppercase;
+      margin-bottom: 28px;
+      box-shadow: 0 4px 16px var(--accent-glow);
+    }
+
+    /* Title — Instrument Serif italic (V1 used system font bold) */
+    .slide__title {
+      font-family: 'Instrument Serif', serif;
+      font-style: italic;
+      font-size: 30px;
+      font-weight: 400;
+      line-height: 1.2;
+      color: var(--ink);
+      margin-bottom: 32px;
+      letter-spacing: -.01em;
+    }
+
+    /* Organic blob frame around icon (entirely new in V2) */
+    .slide__icon-wrap {
+      width: 130px;
+      height: 130px;
+      /* Irregular border-radius creates organic hand-drawn feel */
+      border-radius: 52% 45% 55% 48% / 48% 55% 42% 54%;
+      border: 2.5px solid var(--coral);
+      display: grid;
+      place-items: center;
+      margin-bottom: 32px;
+      position: relative;
+    }
+
+    /* Dashed outer ring — sketchy/hand-drawn accent (new in V2) */
+    .slide__icon-wrap::before {
+      content: '';
+      position: absolute;
+      inset: -6px;
+      border-radius: inherit;
+      border: 1px dashed color-mix(in srgb, var(--coral) 30%, transparent);
+    }
+
+    .slide__icon {
+      font-size: 64px;    /* V1: 96px bare emoji */
+      line-height: 1;
+      user-select: none;
+    }
+
+    .slide__text {
+      font-size: 15px;
+      line-height: 1.8;
+      color: var(--muted);
+      max-width: 440px;
+    }
+
+    /* ===== STAGGERED CONTENT ANIMATION (not in V1) ===== */
+    .slide--active .slide__badge     { animation: revealUp .5s  cubic-bezier(.22,1,.36,1) .05s both; }
+    .slide--active .slide__title     { animation: revealUp .5s  cubic-bezier(.22,1,.36,1) .12s both; }
+    .slide--active .slide__icon-wrap { animation: revealUp .55s cubic-bezier(.22,1,.36,1) .2s  both; }
+    .slide--active .slide__text      { animation: revealUp .5s  cubic-bezier(.22,1,.36,1) .3s  both; }
+
+    @keyframes revealUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ===== NAV ARROWS — SVG icons instead of text entities (V1) ===== */
+    .arrow {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      transition: transform .25s, opacity .25s, box-shadow .25s;
+    }
+
+    .arrow svg {
+      width: 20px;
+      height: 20px;
+      stroke-width: 2.5;
+      fill: none;
+      stroke: currentColor;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    /* Asymmetric arrow styling (V1 had gray + black) */
+    .arrow--prev {
+      background: #4a4a52;    /* muted dark */
+      color: #d0d0d0;
+    }
+
+    .arrow--next {
+      background: var(--cream);    /* warm cream (V1 was #2b2b2b black) */
+      color: var(--ink);
+      box-shadow: 0 4px 20px rgba(0,0,0,.25);
+    }
+
+    .arrow:hover:not(:disabled) { transform: scale(1.12); }
+    .arrow--next:hover:not(:disabled) { box-shadow: 0 6px 28px rgba(0,0,0,.35); }
+    .arrow:active:not(:disabled) { transform: scale(.94); }
+    .arrow:disabled { opacity: .25; cursor: default; }
+
+    /* ===== PAGINATION WITH PROGRESS LINE (V1 had simple dots) ===== */
+    .pagination {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      margin-top: 14px;
+      position: relative;
+    }
+
+    .dot {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      background: none;
+      color: rgba(255,255,255,.3);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      transition: all .3s cubic-bezier(.22,1,.36,1);
+      position: relative;
+    }
+
+    .dot:hover { color: rgba(255,255,255,.7); }
+
+    .dot.active {
+      color: #fff;
+      border-color: rgba(255,255,255,.8);
+      transform: scale(1.15);
+      text-shadow: 0 0 12px rgba(255,255,255,.3);
+    }
+
+    /* Connecting progress line between dots (not in V1) */
+    .pagination__line {
+      position: absolute;
+      top: 50%;
+      height: 1px;
+      background: rgba(255,255,255,.08);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .pagination__progress {
+      height: 100%;
+      background: rgba(255,255,255,.18);
+      transition: width .5s cubic-bezier(.22,1,.36,1);
+      border-radius: 1px;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 640px) {
+      .carousel { grid-template-columns: 42px 1fr 42px; gap: 12px; }
+      .slide { padding: 40px 28px 44px; }
+      .slide__title { font-size: 24px; margin-bottom: 24px; }
+      .slide__icon-wrap { width: 100px; height: 100px; margin-bottom: 24px; }
+      .slide__icon { font-size: 48px; }
+      .slide__text { font-size: 14px; }
+      .arrow { width: 42px; height: 42px; }
+      .arrow svg { width: 16px; height: 16px; }
+      .dot { width: 30px; height: 30px; font-size: 11px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="carousel">
+
+    <!-- Nav: SVG arrow icons (V1 used HTML entities ‹ ›) -->
+    <button class="arrow arrow--prev" aria-label="Previous slide">
+      <svg viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg>
+    </button>
+
+    <div class="carousel__viewport">
+      <div class="carousel__track">
+
+        <div class="slide">
+          <span class="slide__badge">Tip 1</span>
+          <h2 class="slide__title">Communicate your passion</h2>
+          <!-- Organic blob frame wraps the icon (V1 had bare emoji) -->
+          <div class="slide__icon-wrap"><span class="slide__icon">😊</span></div>
+          <p class="slide__text">A bright face says that you are happy and comfortable, you know that mentees will behave, and any non-compliance will be addressed with the minimum of fuss. This becomes a positive self-fulfilling prophecy.</p>
+        </div>
+
+        <div class="slide">
+          <span class="slide__badge">Tip 2</span>
+          <h2 class="slide__title">Set clear expectations</h2>
+          <div class="slide__icon-wrap"><span class="slide__icon">🎯</span></div>
+          <p class="slide__text">Define success criteria and milestones from the start. When everyone understands the goals and boundaries, collaboration becomes smoother and more productive for all parties involved.</p>
+        </div>
+
+        <div class="slide">
+          <span class="slide__badge">Tip 3</span>
+          <h2 class="slide__title">Listen actively</h2>
+          <div class="slide__icon-wrap"><span class="slide__icon">👂</span></div>
+          <p class="slide__text">Give your full attention and show genuine interest in what others are saying. Active listening builds trust and helps you understand the real needs and concerns behind the words.</p>
+        </div>
+
+        <div class="slide">
+          <span class="slide__badge">Tip 4</span>
+          <h2 class="slide__title">Provide constructive feedback</h2>
+          <div class="slide__icon-wrap"><span class="slide__icon">💬</span></div>
+          <p class="slide__text">Focus on specific behaviors and outcomes rather than personal attributes. Frame feedback as opportunities for growth and always balance criticism with recognition of strengths.</p>
+        </div>
+
+        <div class="slide">
+          <span class="slide__badge">Tip 5</span>
+          <h2 class="slide__title">Lead by example</h2>
+          <div class="slide__icon-wrap"><span class="slide__icon">⭐</span></div>
+          <p class="slide__text">Demonstrate the behaviors and work ethic you expect from others. Actions speak louder than words, and your conduct sets the standard for the entire team to follow.</p>
+        </div>
+
+        <div class="slide">
+          <span class="slide__badge">Tip 6</span>
+          <h2 class="slide__title">Celebrate small wins</h2>
+          <div class="slide__icon-wrap"><span class="slide__icon">🎉</span></div>
+          <p class="slide__text">Acknowledge progress and achievements, no matter how small. Regular recognition boosts morale and motivation, creating momentum toward larger goals and sustained success.</p>
+        </div>
+
+        <div class="slide">
+          <span class="slide__badge">Tip 7</span>
+          <h2 class="slide__title">Foster collaboration</h2>
+          <div class="slide__icon-wrap"><span class="slide__icon">🤝</span></div>
+          <p class="slide__text">Create opportunities for team members to work together and share knowledge. Collaborative environments spark innovation and help everyone grow through shared experiences.</p>
+        </div>
+
+        <div class="slide">
+          <span class="slide__badge">Tip 8</span>
+          <h2 class="slide__title">Adapt and iterate</h2>
+          <div class="slide__icon-wrap"><span class="slide__icon">🔄</span></div>
+          <p class="slide__text">Stay flexible and willing to adjust your approach based on feedback and results. Continuous improvement is key to long-term success and maintaining relevance in changing environments.</p>
+        </div>
+
+      </div>
+    </div>
+
+    <button class="arrow arrow--next" aria-label="Next slide">
+      <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+    </button>
+
+    <!-- Pagination with connecting progress line (V1 had plain dots) -->
+    <div class="pagination">
+      <div class="pagination__line">
+        <div class="pagination__progress"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const track = document.querySelector('.carousel__track');
+    const slides = [...track.children];
+    const prevBtn = document.querySelector('.arrow--prev');
+    const nextBtn = document.querySelector('.arrow--next');
+    const pagination = document.querySelector('.pagination');
+    const progressLine = document.querySelector('.pagination__line');
+    const progressFill = document.querySelector('.pagination__progress');
+    const total = slides.length;
+    let current = 0;
+
+    // Build numbered pagination dots
+    for (let i = 0; i < total; i++) {
+      const btn = document.createElement('button');
+      btn.className = 'dot';
+      btn.textContent = i + 1;
+      btn.setAttribute('aria-label', `Go to slide ${i + 1}`);
+      btn.addEventListener('click', () => go(i));
+      pagination.appendChild(btn);
+    }
+    const dots = [...pagination.querySelectorAll('.dot')];
+
+    // Size the connecting line to span first → last dot centers
+    function sizeLine() {
+      if (dots.length < 2) return;
+      const first = dots[0].getBoundingClientRect();
+      const last  = dots[dots.length - 1].getBoundingClientRect();
+      const pRect = pagination.getBoundingClientRect();
+      const left  = first.left + first.width / 2 - pRect.left;
+      const right = last.left  + last.width  / 2 - pRect.left;
+      Object.assign(progressLine.style, {
+        left: left + 'px',
+        width: (right - left) + 'px',
+        transform: 'translateY(-50%)'
+      });
+    }
+
+    function go(index) {
+      const prev = current;
+      current = Math.max(0, Math.min(index, total - 1));
+
+      // Slide the track
+      track.style.transform = `translateX(-${current * 100}%)`;
+
+      // Arrow states
+      prevBtn.disabled = current === 0;
+      nextBtn.disabled = current === total - 1;
+
+      // Active dot
+      dots.forEach((d, i) => d.classList.toggle('active', i === current));
+
+      // Progress fill (new in V2 — visualises process progression)
+      progressFill.style.width = (total > 1 ? (current / (total - 1)) * 100 : 0) + '%';
+
+      // Staggered content reveal animation (new in V2)
+      if (prev !== current) {
+        slides[prev]?.classList.remove('slide--active');
+        void slides[current].offsetWidth;  // reflow to retrigger animation
+        slides[current].classList.add('slide--active');
+      }
+    }
+
+    prevBtn.addEventListener('click', () => go(current - 1));
+    nextBtn.addEventListener('click', () => go(current + 1));
+
+    // Keyboard nav
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowLeft')  go(current - 1);
+      if (e.key === 'ArrowRight') go(current + 1);
+    });
+
+    // Touch swipe support
+    let x0 = null;
+    track.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, { passive: true });
+    track.addEventListener('touchend', e => {
+      if (x0 === null) return;
+      const diff = x0 - e.changedTouches[0].clientX;
+      if (Math.abs(diff) > 40) go(current + (diff > 0 ? 1 : -1));
+      x0 = null;
+    });
+
+    // Init
+    window.addEventListener('resize', sizeLine);
+    sizeLine();
+    go(0);
+  </script>
+
+</body>
+</html>

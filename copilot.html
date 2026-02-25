@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Process / Tips Carousel</title>
+<style>
+  :root{
+    --bg: #f5f5f5;
+    --card-bg: #fff;
+    --text: #111;
+    --muted: #6b7280;
+    --shadow: 0 10px 30px rgba(0,0,0,.08);
+    --brand: #0f9d58;         /* green badge */
+    --accent: #ec407a;        /* pink icon (demo) */
+    --radius: 12px;
+    --radius-pill: 999px;
+    --space-1: clamp(.4rem,.6vw,.6rem);
+    --space-2: clamp(.8rem,1.1vw,1rem);
+    --space-3: clamp(1rem,1.6vw,1.25rem);
+    --space-4: clamp(1.25rem,2vw,1.75rem);
+    --space-5: clamp(1.5rem,3vw,2.25rem);
+    --fs-sm: clamp(.9rem, .9vw, 1rem);
+    --fs-md: clamp(1.05rem, 1.2vw, 1.15rem);
+    --fs-lg: clamp(1.25rem, 2vw, 1.75rem);
+    --fs-xl: clamp(1.4rem, 3vw, 2rem);
+    --nav-size: clamp(42px, 4.5vw, 56px);
+    --bullet-size: 38px;
+    --transition: 350ms cubic-bezier(.2,.7,.2,1);
+  }
+
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji","Segoe UI Emoji", "Segoe UI Symbol";
+    color: var(--text);
+    background: var(--bg);
+    display:flex; align-items:center; justify-content:center;
+    padding: clamp(10px, 3vw, 32px);
+  }
+
+  .carousel{
+    width:min(100%, 980px);
+  }
+
+  /* Track + card container */
+  .carousel__viewport{
+    position:relative;
+    overflow:hidden; /* mask overflow during slide */
+    padding-inline: clamp(56px, 7vw, 80px); /* room for arrows */
+  }
+
+  /* The card itself */
+  .carousel__card{
+    position:relative;
+    background: var(--card-bg);
+    box-shadow: var(--shadow);
+    border-radius: var(--radius);
+    padding: clamp(18px, 3.5vw, 28px) clamp(18px, 4vw, 40px) clamp(28px, 4vw, 40px);
+  }
+
+  /* Tip badge */
+  .carousel__badge{
+    position:absolute;
+    left:50%;
+    translate:-50% -50%;
+    top:0;
+    background: var(--brand);
+    color:#fff;
+    padding: .35rem .9rem;
+    border-radius: var(--radius-pill);
+    font-weight: 700;
+    font-size: var(--fs-sm);
+    box-shadow: 0 6px 16px rgba(15, 157, 88, .25);
+    white-space:nowrap;
+  }
+
+  .carousel__title{
+    font-size: var(--fs-xl);
+    line-height:1.2;
+    margin: 0 0 var(--space-4);
+  }
+
+  .carousel__content{
+    display:grid;
+    gap: var(--space-4);
+    grid-template-columns: minmax(0,1fr);
+  }
+  @media (min-width: 720px){
+    .carousel__content{
+      grid-template-columns: 1fr 1.2fr; /* image | text */
+      align-items:center;
+    }
+  }
+
+  .carousel__figure{
+    display:flex; align-items:center; justify-content:center;
+  }
+  .carousel__figure svg{
+    width: clamp(140px, 24vw, 230px);
+    height: auto;
+  }
+  .carousel__desc{
+    color: var(--muted);
+    font-size: var(--fs-md);
+    line-height:1.65;
+  }
+
+  /* Slides layout */
+  .carousel__track{
+    position:relative;
+    display:flex;
+    will-change: transform, height;
+    transition: height var(--transition);
+  }
+  .carousel__slide{
+    min-width:100%;
+    flex:0 0 100%;
+    opacity:.2;
+    transform: translateX(0);
+    transition: opacity var(--transition);
+  }
+  .carousel__slide[aria-hidden="true"]{ pointer-events:none; }
+  .carousel__slide.is-active{ opacity:1; }
+
+  /* Prev/Next controls */
+  .carousel__nav{
+    position:absolute;
+    inset:0;
+    display:flex; align-items:center; justify-content:space-between;
+    pointer-events:none; /* allow clicks only on buttons */
+  }
+  .carousel__btn{
+    pointer-events:auto;
+    inline-size: var(--nav-size);
+    block-size: var(--nav-size);
+    display:grid; place-items:center;
+    border:none; border-radius:50%;
+    background:#e5e7eb;
+    color:#111;
+    cursor:pointer;
+    box-shadow: var(--shadow);
+    transition: transform 160ms ease, background 160ms ease;
+  }
+  .carousel__btn:hover{ background:#ddd; transform: translateY(-1px); }
+  .carousel__btn:active{ transform: translateY(0); }
+  .carousel__btn:focus-visible{ outline: 3px solid color-mix(in oklab, var(--brand) 70%, white); outline-offset:3px; }
+
+  .carousel__btn svg{ width: 24px; height: 24px; }
+
+  /* Pagination (numbered bullets) */
+  .carousel__pagination{
+    display:flex; gap: 6px; justify-content:center; align-items:center;
+    margin-top: var(--space-3);
+    user-select:none;
+  }
+  .carousel__bullet{
+    inline-size: var(--bullet-size);
+    block-size: var(--bullet-size);
+    border-radius: 50%;
+    background: transparent;
+    border: 2px solid #cfcfcf;
+    color: #444;
+    font-weight: 600;
+    font-size: .95rem;
+    display:grid; place-items:center;
+    cursor:pointer;
+    transition: background var(--transition), color var(--transition), border-color var(--transition), transform 120ms ease;
+  }
+  .carousel__bullet:hover{ transform: translateY(-1px); }
+  .carousel__bullet[aria-current="true"]{
+    background:#111; color:#fff; border-color:#111;
+  }
+  .carousel__bullet:focus-visible{ outline: 3px solid color-mix(in oklab, #111 50%, var(--brand) 50%); outline-offset:3px; }
+
+  /* Motion preferences */
+  @media (prefers-reduced-motion: reduce){
+    .carousel__track,
+    .carousel__slide{
+      transition: none !important;
+    }
+  }
+
+  /* Subtle backdrop strip like screenshot */
+  .carousel__viewport::before{
+    content:"";
+    position:absolute; inset: 10% 0 auto 0;
+    height: calc(100% - 20%);
+    background: linear-gradient(to bottom, transparent 0 20%, rgba(0,0,0,.02) 20% 80%, transparent 80% 100%);
+    pointer-events:none;
+  }
+</style>
+</head>
+<body>
+
+<section class="carousel" aria-roledescription="carousel" aria-label="Tips">
+  <div class="carousel__viewport">
+    <div class="carousel__track" id="track" aria-live="polite">
+      <!-- Slide 1 -->
+      <article class="carousel__slide is-active" role="group" aria-roledescription="slide" aria-label="1 of 8">
+        <div class="carousel__card">
+          <div class="carousel__badge" data-badge>Tip 1</div>
+          <h2 class="carousel__title">Communicate your passion</h2>
+
+          <div class="carousel__content">
+            <figure class="carousel__figure" aria-hidden="true">
+              <!-- demo face -->
+              <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" style="color:var(--accent);">
+                <circle cx="60" cy="60" r="40" stroke-width="6"/>
+                <circle cx="45" cy="55" r="8" stroke-width="6"/>
+                <circle cx="75" cy="55" r="8" stroke-width="6"/>
+                <path d="M38 78c7 8 37 8 44 0" stroke-width="6" stroke-linecap="round"/>
+                <path d="M53 35l-8 4m18-4l-8 4m18-4l-8 4" stroke-width="6" stroke-linecap="round"/>
+              </svg>
+            </figure>
+
+            <p class="carousel__desc">
+              A bright face says that you are happy and comfortable; mentees will behave, and any non‑compliance will be addressed with the minimum of fuss. This becomes a positive self‑fulfilling prophecy.
+            </p>
+          </div>
+        </div>
+      </article>
+
+      <!-- Slide 2 -->
+      <article class="carousel__slide" role="group" aria-roledescription="slide" aria-label="2 of 8">
+        <div class="carousel__card">
+          <div class="carousel__badge" data-badge>Tip 2</div>
+          <h2 class="carousel__title">Set clear expectations</h2>
+          <div class="carousel__content">
+            <figure class="carousel__figure" aria-hidden="true">
+              <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" style="color:var(--accent);">
+                <rect x="20" y="25" width="80" height="70" rx="8" stroke-width="6"/>
+                <path d="M35 45h50M35 60h30M35 75h40" stroke-width="6" stroke-linecap="round"/>
+              </svg>
+            </figure>
+            <p class="carousel__desc">Explain what good looks like and how progress will be measured. Clarity removes friction and builds confidence.</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- Slide 3 -->
+      <article class="carousel__slide" role="group" aria-roledescription="slide" aria-label="3 of 8">
+        <div class="carousel__card">
+          <div class="carousel__badge" data-badge>Tip 3</div>
+          <h2 class="carousel__title">Give timely feedback</h2>
+          <div class="carousel__content">
+            <figure class="carousel__figure" aria-hidden="true">
+              <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" style="color:var(--accent);">
+                <path d="M20 30h80v50H50l-18 15 4-15H20z" stroke-width="6" stroke-linejoin="round"/>
+                <path d="M38 50h44" stroke-width="6" stroke-linecap="round"/>
+              </svg>
+            </figure>
+            <p class="carousel__desc">Short feedback loops keep momentum and allow small course corrections before issues expand.</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- Add more slides if needed... -->
+    </div>
+
+    <!-- Prev/Next controls overlay -->
+    <div class="carousel__nav" aria-hidden="false">
+      <button class="carousel__btn" id="prevBtn" aria-label="Previous tip">
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M15 6l-6 6 6 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="carousel__btn" id="nextBtn" aria-label="Next tip">
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 6l6 6-6 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Numbered pagination -->
+  <div class="carousel__pagination" id="pagination" role="tablist" aria-label="Choose tip"></div>
+</section>
+
+<script>
+/*
+  Lightweight carousel for a single visible slide.
+  - Keyboard: ← →, Home/End. Bullets have roving tabindex.
+  - ARIA: updates slide aria-label "n of N" + bullets aria-current.
+  - Auto-height: track height animates to current slide.
+  - Touch: basic swipe.
+*/
+(() => {
+  const track = document.getElementById('track');
+  const slides = Array.from(track.children);
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const pagination = document.getElementById('pagination');
+
+  let index = 0;
+  const count = slides.length;
+
+  // Build numbered bullets
+  slides.forEach((_, i) => {
+    const b = document.createElement('button');
+    b.className = 'carousel__bullet';
+    b.type = 'button';
+    b.role = 'tab';
+    b.setAttribute('aria-controls', ''); // decorative
+    b.textContent = i + 1;
+    b.addEventListener('click', () => goTo(i));
+    pagination.appendChild(b);
+  });
+  const bullets = Array.from(pagination.children);
+
+  // Roving tabindex for bullets
+  const updateBulletTabIndex = () => {
+    bullets.forEach((b, i) => b.tabIndex = (i === index ? 0 : -1));
+  };
+
+  // Layout helpers
+  function setTrackTransform(){
+    const offset = -index * track.clientWidth;
+    track.style.transform = `translateX(${offset}px)`;
+  }
+  function setSlideStates(){
+    slides.forEach((s, i) => {
+      s.classList.toggle('is-active', i === index);
+      s.setAttribute('aria-hidden', i === index ? 'false' : 'true');
+      s.setAttribute('aria-label', `${i+1} of ${count}`);
+      // Update the "Tip n" badge
+      const badge = s.querySelector('[data-badge]');
+      if (badge) badge.textContent = `Tip ${i+1}`;
+    });
+    bullets.forEach((b, i) => b.setAttribute('aria-current', i === index ? 'true' : 'false'));
+    updateBulletTabIndex();
+  }
+  function setAutoHeight(){
+    const h = slides[index].offsetHeight;
+    track.style.height = h + 'px';
+  }
+  function goTo(i){
+    index = (i + count) % count;
+    setSlideStates();
+    setAutoHeight();
+    setTrackTransform();
+  }
+
+  // Resize handler keeps slide width in sync
+  const onResize = () => {
+    setAutoHeight();
+    setTrackTransform();
+  };
+  window.addEventListener('resize', onResize);
+
+  // Prev / Next
+  prevBtn.addEventListener('click', () => goTo(index - 1));
+  nextBtn.addEventListener('click', () => goTo(index + 1));
+
+  // Keyboard navigation on viewport
+  document.querySelector('.carousel')
+    .addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') { e.preventDefault(); goTo(index + 1); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); goTo(index - 1); }
+      else if (e.key === 'Home') { e.preventDefault(); goTo(0); }
+      else if (e.key === 'End') { e.preventDefault(); goTo(count - 1); }
+    });
+
+  // Basic swipe
+  let startX = null, isTouching = false;
+  track.addEventListener('pointerdown', (e) => { isTouching = true; startX = e.clientX; });
+  window.addEventListener('pointerup', () => { isTouching = false; startX = null; });
+  window.addEventListener('pointermove', (e) => {
+    if (!isTouching || startX == null) return;
+    const dx = e.clientX - startX;
+    if (Math.abs(dx) > 60){
+      goTo(index + (dx < 0 ? 1 : -1));
+      isTouching = false; startX = null;
+    }
+  }, {passive:true});
+
+  // Initial state
+  // Set track width equal to number of slides to keep transform simple
+  function normalizeTrackWidth(){
+    track.style.display = 'flex';
+    slides.forEach(s => (s.style.minWidth = '100%'));
+  }
+  normalizeTrackWidth();
+  goTo(0);
+})();
+</script>
+
+</body>
+</html>

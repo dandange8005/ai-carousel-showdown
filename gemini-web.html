@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Process Carousel Component</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* CSS STYLES START HERE */
+        :root {
+            --primary-green: #198754; /* Color from the Tip badge */
+            --accent-pink: #e83e8c;   /* Color from the icon */
+            --text-dark: #212529;
+            --text-muted: #6c757d;
+            --bg-light-grey: #f8f9fa;
+            --card-white: #ffffff;
+            --nav-btn-active: #000000;
+            --nav-btn-disabled: #adb5bd;
+            --transition-speed: 0.4s;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-light-grey);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Main Carousel Container */
+        .process-carousel {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+        }
+
+        /* Area holding arrows and card window */
+        .carousel-main-area {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            gap: 20px;
+        }
+
+        /* The window that clips the overflowing content */
+        .carousel-window {
+            background: var(--card-white);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            width: 100%;
+            max-width: 600px;
+            /* Important for positioning the badge */
+            position: relative; 
+            padding: 60px 40px 40px; /* Extra top padding for badge space */
+            overflow: hidden;
+        }
+
+        /* The "Tip X" Badge */
+        .tip-badge {
+            position: absolute;
+            top: -20px; /* Pulls it half out of the top */
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--primary-green);
+            color: white;
+            font-weight: 700;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            z-index: 10;
+        }
+
+        /* The long track that holds all slides horizontally */
+        .carousel-track {
+            display: flex;
+            transition: transform var(--transition-speed) ease-in-out;
+            width: 100%;
+        }
+
+        /* Individual Slide */
+        .carousel-slide {
+            /* Ensures each slide takes full width of the window */
+            flex: 0 0 100%;
+            width: 100%;
+            text-align: center;
+            /* Hide slides not in view from screen readers/tab order */
+            visibility: hidden; 
+            opacity: 0;
+            transition: opacity var(--transition-speed) ease-in-out, visibility var(--transition-speed);
+        }
+
+        /* Only the active slide is visible */
+        .carousel-slide.active {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .slide-title {
+            font-size: 1.75rem;
+            color: var(--text-dark);
+            margin-bottom: 30px;
+        }
+
+        .slide-icon {
+            margin-bottom: 30px;
+            color: var(--accent-pink);
+        }
+
+        /* Using an SVG for sharp rendering */
+        .slide-icon svg {
+            width: 100px;
+            height: auto;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .slide-description {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: var(--text-dark);
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        /* Navigation Buttons (Arrows) */
+        .nav-btn {
+            background: var(--nav-btn-active);
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: white;
+            transition: background-color 0.3s ease;
+            /* Fix for mobile tap highlight */
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            background-color: #333;
+        }
+
+        /* Disabled state for first/last slide */
+        .nav-btn:disabled {
+            background: var(--nav-btn-disabled);
+            cursor: not-allowed;
+        }
+
+        /* Pagination Dots (Numbers) */
+        .pagination-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .page-dot {
+            background: none;
+            border: 2px solid transparent;
+            color: var(--text-dark);
+            font-size: 1.1rem;
+            font-weight: 600;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .page-dot:hover {
+            color: #000;
+        }
+
+        /* Active pagination state (circled) */
+        .page-dot.active {
+            border-color: var(--text-dark);
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .carousel-main-area {
+                gap: 10px;
+            }
+            
+            .nav-btn {
+                width: 40px;
+                height: 40px;
+            }
+
+            .carousel-window {
+                padding: 50px 20px 30px;
+            }
+
+            .slide-title {
+                font-size: 1.4rem;
+            }
+             .slide-description {
+                font-size: 1rem;
+            }
+            
+             .page-dot {
+                 width: 32px;
+                 height: 32px;
+                 font-size: 1rem;
+                 gap: 8px;
+             }
+        }
+    /* CSS STYLES END HERE */
+    </style>
+</head>
+<body>
+
+    <section class="process-carousel" aria-label="Process Tips Carousel">
+        
+        <div class="carousel-main-area">
+            <button class="nav-btn prev-btn" aria-label="Previous Step">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </button>
+
+            <div class="carousel-window">
+                <div class="tip-badge" id="currentTipBadge">Tip 1</div>
+
+                <div class="carousel-track" id="carouselTrack">
+                    
+                    <div class="carousel-slide active" data-tip-number="1">
+                        <h2 class="slide-title">Communicate your passion</h2>
+                        <div class="slide-icon">
+                            <svg viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="45" />
+                                <circle cx="35" cy="40" r="5" fill="currentColor" />
+                                <circle cx="65" cy="40" r="5" fill="currentColor" />
+                                <path d="M 30 65 Q 50 85 70 65" fill="none" />
+                                <path d="M 50 5 L 50 15 M 35 10 L 40 20 M 65 10 L 60 20" />
+                            </svg>
+                        </div>
+                        <p class="slide-description">
+                            A bright face says that you are happy and comfortable, you know that mentees will behave, and any non-compliance will be addressed with the minimum of fuss. This becomes a positive self-fulfilling prophecy.
+                        </p>
+                    </div>
+
+                    <div class="carousel-slide" data-tip-number="2">
+                        <h2 class="slide-title">Set clear expectations</h2>
+                        <div class="slide-icon">
+                             <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                        </div>
+                        <p class="slide-description">
+                           Define the process roadmap early. When participants know what is expected at each stage, anxiety decreases and engagement improves.
+                        </p>
+                    </div>
+
+                    <div class="carousel-slide" data-tip-number="3">
+                        <h2 class="slide-title">Listen actively</h2>
+                        <div class="slide-icon">
+                            <svg viewBox="0 0 24 24"><path d="M3 18v-6a9 9 0 0 1 18 0v6"></path><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path></svg>
+                        </div>
+                        <p class="slide-description">
+                            True communication is two-way. Pay attention not just to their words, but their tone and body language to understand their real needs.
+                        </p>
+                    </div>
+                    
+                    <div class="carousel-slide" data-tip-number="4"><h2 class="slide-title">Step 4 Title</h2><p class="slide-description">Description for step 4.</p></div>
+                    <div class="carousel-slide" data-tip-number="5"><h2 class="slide-title">Step 5 Title</h2><p class="slide-description">Description for step 5.</p></div>
+                    <div class="carousel-slide" data-tip-number="6"><h2 class="slide-title">Step 6 Title</h2><p class="slide-description">Description for step 6.</p></div>
+                    <div class="carousel-slide" data-tip-number="7"><h2 class="slide-title">Step 7 Title</h2><p class="slide-description">Description for step 7.</p></div>
+                    <div class="carousel-slide" data-tip-number="8"><h2 class="slide-title">Final Step Title</h2><p class="slide-description">Conclusion of the process.</p></div>
+
+                </div>
+            </div>
+
+            <button class="nav-btn next-btn" aria-label="Next Step">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
+        </div>
+
+        <div class="pagination-controls" id="paginationDots">
+            </div>
+
+    </section>
+
+    <script>
+        // JS LOGIC STARTS HERE
+        document.addEventListener('DOMContentLoaded', () => {
+            const track = document.getElementById('carouselTrack');
+            const slides = Array.from(track.children);
+            const nextBtn = document.querySelector('.next-btn');
+            const prevBtn = document.querySelector('.prev-btn');
+            const paginationContainer = document.getElementById('paginationDots');
+            const tipBadge = document.getElementById('currentTipBadge');
+
+            let currentIndex = 0;
+            const totalSlides = slides.length;
+
+            // 1. Initialize Pagination Dots based on number of slides
+            slides.forEach((slide, index) => {
+                const dot = document.createElement('button');
+                dot.classList.add('page-dot');
+                // Mark the first one as active initially
+                if (index === 0) dot.classList.add('active');
+                dot.innerText = index + 1;
+                dot.setAttribute('aria-label', `Go to step ${index + 1}`);
+                // Add click event to dot
+                dot.addEventListener('click', () => {
+                    currentIndex = index;
+                    updateCarousel();
+                });
+                paginationContainer.appendChild(dot);
+            });
+
+            const dots = Array.from(paginationContainer.children);
+
+            // 2. Core Function to update the carousel view
+            function updateCarousel() {
+                // Move the track
+                track.style.transform = `translateX(-${currentIndex * 100}%)`;
+
+                // Update active slide class (for visibility/accessibility)
+                slides.forEach(slide => slide.classList.remove('active'));
+                slides[currentIndex].classList.add('active');
+
+                // Update active pagination dot
+                dots.forEach(dot => dot.classList.remove('active'));
+                dots[currentIndex].classList.add('active');
+
+                // Update the "Tip X" Badge text based on data attribute
+                const currentTipNum = slides[currentIndex].getAttribute('data-tip-number');
+                tipBadge.innerText = `Tip ${currentTipNum}`;
+
+                // Update Button States (Disabled/Enabled)
+                prevBtn.disabled = currentIndex === 0;
+                nextBtn.disabled = currentIndex === totalSlides - 1;
+            }
+
+            // 3. Event Listeners for Navigation Arrows
+            nextBtn.addEventListener('click', () => {
+                if (currentIndex < totalSlides - 1) {
+                    currentIndex++;
+                    updateCarousel();
+                }
+            });
+
+            prevBtn.addEventListener('click', () => {
+                if (currentIndex > 0) {
+                    currentIndex--;
+                    updateCarousel();
+                }
+            });
+
+            // Initial call to set correct states on load
+            updateCarousel();
+        });
+        // JS LOGIC ENDS HERE
+    </script>
+</body>
+</html>

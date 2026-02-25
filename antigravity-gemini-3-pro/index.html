@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Process Carousel</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts for modern typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="carousel-container">
+        <!-- Navigation Button: Previous -->
+        <button class="nav-btn prev-btn" id="prevBtn" aria-label="Previous Slide">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+
+        <div class="carousel-track-container">
+            <ul class="carousel-track">
+                <!-- Slide 1 -->
+                <li class="carousel-slide current-slide">
+                    <div class="card">
+                        <div class="tip-badge">Tip 1</div>
+                        <h2 class="card-title">Communicate your passion</h2>
+                        <div class="card-image">
+                            <!-- Using an SVG placeholder that looks like the example -->
+                            <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="60" cy="60" r="50" stroke="#E91E63" stroke-width="4"/>
+                                <circle cx="45" cy="50" r="5" fill="#E91E63"/>
+                                <circle cx="75" cy="50" r="5" fill="#E91E63"/>
+                                <path d="M40 75 C40 75, 50 90, 80 75" stroke="#E91E63" stroke-width="4" stroke-linecap="round"/>
+                                <path d="M50 25 L50 35 M60 20 L60 30 M70 25 L70 35" stroke="#E91E63" stroke-width="3" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <p class="card-text">
+                            A bright face says that you are happy and comfortable, you know that mentees will behave, and any non-compliance will be addressed with the minimum of fuss. This becomes a positive self-fulfilling prophecy.
+                        </p>
+                    </div>
+                </li>
+                <!-- Slide 2 -->
+                <li class="carousel-slide">
+                    <div class="card">
+                        <div class="tip-badge">Tip 2</div>
+                        <h2 class="card-title">Be Prepared</h2>
+                        <div class="card-image">
+                           <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="30" y="30" width="60" height="60" rx="5" stroke="#E91E63" stroke-width="4"/>
+                                <path d="M40 50 L80 50 M40 70 L80 70" stroke="#E91E63" stroke-width="3" stroke-linecap="round"/>
+                           </svg>
+                        </div>
+                        <p class="card-text">
+                            Preparation is key to a successful session. Ensure you have all materials ready and a clear plan of action. This builds confidence and trust with your mentees.
+                        </p>
+                    </div>
+                </li>
+                <!-- Slide 3 -->
+                <li class="carousel-slide">
+                    <div class="card">
+                        <div class="tip-badge">Tip 3</div>
+                        <h2 class="card-title">Listen Actively</h2>
+                        <div class="card-image">
+                             <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M30 60 C30 30, 90 30, 90 60 L90 80 C90 90, 80 90, 80 80 L80 60" stroke="#E91E63" stroke-width="4" stroke-linecap="round" fill="none"/>
+                            </svg>
+                        </div>
+                        <p class="card-text">
+                            Active listening involves fully concentrating, understanding, responding, and then remembering what is being said. It is the foundation of effective communication.
+                        </p>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Navigation Button: Next -->
+        <button class="nav-btn next-btn" id="nextBtn" aria-label="Next Slide">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+    </div>
+
+    <!-- Pagination Indicators -->
+    <div class="carousel-nav">
+        <button class="carousel-indicator current-slide" data-slide-index="0">1</button>
+        <button class="carousel-indicator" data-slide-index="1">2</button>
+        <button class="carousel-indicator" data-slide-index="2">3</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,189 @@
+/* Modern CSS Reset & Base Styles */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f4f6f8; /* Light gray background similar to image */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* Carousel Container */
+.carousel-container {
+    position: relative;
+    width: 100%;
+    max-width: 800px; /* Adjust based on preference */
+    margin: 0 auto 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.carousel-track-container {
+    overflow: hidden;
+    width: 100%;
+    /* Add some padding to avoid cutting off shadows */
+    padding: 20px 0; 
+}
+
+.carousel-track {
+    display: flex;
+    list-style: none;
+    transition: transform 0.4s ease-in-out;
+}
+
+.carousel-slide {
+    min-width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 0 10px; /* Space between slides if visible */
+}
+
+/* Card Styling */
+.card {
+    background: white;
+    border-radius: 8px;
+    padding: 40px; /* Inner padding */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); /* Soft shadow */
+    text-align: center;
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+}
+
+/* Tip Badge */
+.tip-badge {
+    position: absolute;
+    top: -18px; /* Pulled up */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #198754; /* Green color */
+    color: white;
+    font-weight: 600;
+    padding: 8px 24px;
+    border-radius: 4px;
+    font-size: 1rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.card-title {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #000;
+}
+
+.card-image {
+    margin: 20px auto;
+    /* Optional: Fixed height to prevent jumping */
+    height: 120px; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-text {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #4a4a4a;
+    max-width: 90%;
+    margin: 0 auto;
+}
+
+/* Navigation Buttons (Prev/Next) */
+.nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.3); /* Semi-transparent dark bg */
+    border: none;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: white;
+    transition: background-color 0.2s;
+    z-index: 10;
+}
+
+.nav-btn:hover {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.nav-btn:focus {
+    outline: 2px solid #000;
+    outline-offset: 2px;
+}
+
+.prev-btn {
+    left: -60px; /* Position outside the card */
+}
+
+.next-btn {
+    right: -60px; /* Position outside the card */
+}
+
+/* Handle mobile responsiveness for buttons */
+@media (max-width: 768px) {
+    .nav-btn {
+        width: 36px;
+        height: 36px;
+    }
+    .prev-btn {
+        left: 0;
+    }
+    .next-btn {
+        right: 0;
+    }
+    .card {
+        padding: 30px 20px;
+    }
+}
+
+/* Pagination Indicators */
+.carousel-nav {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.carousel-indicator {
+    border: 1px solid transparent; /* default border */
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #666;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+/* Active State for Indicator (Circle with border) */
+.carousel-indicator.current-slide {
+    border-color: #000;
+    font-weight: 700;
+    color: #000;
+    background: white; /* Optional: if you want a bg */
+}
+
+.carousel-indicator:hover {
+    color: #000;
+}

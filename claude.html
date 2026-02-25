@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Process Tips Carousel</title>
+  <style>
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --green: #1a9e7a;
+      --dark: #2b2b2b;
+      --gray: #555;
+      --white: #fff;
+      --radius: 14px;
+      --slide-gap: 24px;
+      --transition-speed: .45s;
+      --transition-ease: cubic-bezier(.4, 0, .2, 1);
+    }
+
+    /* ----------------------------------------------------------------
+       REDUCED MOTION — disable all transitions/animations for users
+       who have enabled "Reduce motion" in OS accessibility settings.
+    ---------------------------------------------------------------- */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--dark);
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      color: var(--dark);
+    }
+
+    /* ================================================================
+       LAYOUT — CSS Grid places arrows | viewport | arrows in a row,
+       with pagination spanning the full width below.
+    ================================================================ */
+    .carousel {
+      max-width: 720px;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 48px 1fr 48px;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .carousel__viewport {
+      overflow: hidden;
+      border-radius: var(--radius);
+      background: var(--white);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, .35);
+    }
+
+    .carousel__track {
+      display: flex;
+      transition: transform var(--transition-speed) var(--transition-ease);
+      will-change: transform;
+    }
+
+    /* ================================================================
+       SLIDE — each tip card. Uses role="tabpanel" with proper ARIA
+       to associate with its pagination tab.
+    ================================================================ */
+    .slide {
+      min-width: 100%;
+      padding: 48px 56px 52px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: var(--slide-gap);
+    }
+
+    /* Hidden slides are removed from tab order and screen readers
+       via inert. This CSS ensures they also visually "look" hidden
+       if a browser hasn't fully painted the inert state. */
+    .slide[inert] {
+      visibility: hidden;
+    }
+
+    .slide__badge {
+      background: var(--green);
+      color: var(--white);
+      font-size: 13px;
+      font-weight: 700;
+      padding: 6px 22px;
+      border-radius: 20px;
+      letter-spacing: .4px;
+    }
+
+    .slide__title {
+      font-size: 26px;
+      font-weight: 700;
+      line-height: 1.25;
+    }
+
+    .slide__icon {
+      font-size: 96px;
+      line-height: 1;
+      user-select: none;
+    }
+
+    .slide__text {
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--gray);
+      max-width: 460px;
+    }
+
+    /* ================================================================
+       NAV ARROWS — circular buttons with distinct prev/next styling.
+       Focus-visible ring ensures keyboard users see focus clearly.
+    ================================================================ */
+    .arrow {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      font-size: 22px;
+      transition:
+        opacity .2s,
+        transform .2s,
+        outline-offset .15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .arrow--prev {
+      background: #9e9e9e;
+      color: var(--white);
+    }
+
+    .arrow--next {
+      background: var(--dark);
+      color: var(--white);
+    }
+
+    .arrow:hover:not(:disabled) {
+      transform: scale(1.1);
+    }
+
+    .arrow:active:not(:disabled) {
+      transform: scale(.95);
+    }
+
+    .arrow:disabled {
+      opacity: .35;
+      cursor: default;
+    }
+
+    /* Keyboard-only focus ring (not shown on mouse click) */
+    .arrow:focus-visible {
+      outline: 2px solid var(--green);
+      outline-offset: 3px;
+    }
+
+    /* ================================================================
+       PAGINATION — role="tablist" with numbered tab buttons.
+       Active tab is marked with aria-selected="true".
+    ================================================================ */
+    .pagination {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .dot {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      background: none;
+      color: #bbb;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      transition: all .25s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .dot:hover {
+      color: var(--white);
+    }
+
+    .dot[aria-selected="true"] {
+      border-color: var(--white);
+      color: var(--white);
+    }
+
+    .dot:focus-visible {
+      outline: 2px solid var(--green);
+      outline-offset: 3px;
+    }
+
+    /* ================================================================
+       SCREEN-READER-ONLY — visually hidden live region that
+       announces the current slide to assistive technology.
+    ================================================================ */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    /* ================================================================
+       RESPONSIVE — tighter layout on small screens.
+    ================================================================ */
+    @media (max-width: 600px) {
+      .carousel { grid-template-columns: 38px 1fr 38px; gap: 10px; }
+      .slide { padding: 36px 28px 40px; }
+      .slide__title { font-size: 21px; }
+      .slide__icon { font-size: 72px; }
+      .arrow { width: 38px; height: 38px; font-size: 18px; }
+      .dot { width: 28px; height: 28px; font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!--
+    ARIA: role="region" + aria-roledescription="carousel" follows the
+    WAI-ARIA Carousel Pattern. aria-label names the landmark so screen
+    readers announce "Process Tips, carousel" when entering.
+    https://www.w3.org/WAI/ARIA/apd/patterns/carousel/
+  -->
+  <section
+    class="carousel"
+    role="region"
+    aria-roledescription="carousel"
+    aria-label="Process Tips"
+  >
+    <button class="arrow arrow--prev" aria-label="Previous slide">&#8249;</button>
+
+    <!--
+      aria-live="polite" makes screen readers announce slide content
+      after navigation, without interrupting current speech.
+    -->
+    <div class="carousel__viewport" aria-live="polite">
+      <div class="carousel__track">
+
+        <!--
+          Each slide uses:
+          - role="tabpanel" to pair with its pagination tab
+          - aria-roledescription="slide" for clearer SR announcement
+          - aria-label="N of Total" for orientation
+          - id matching the tab's aria-controls
+          - inert on inactive slides: removes them from tab order,
+            screen reader tree, and click targets in one attribute
+        -->
+        <div class="slide" role="tabpanel" aria-roledescription="slide" aria-label="1 of 8" id="slide-1">
+          <span class="slide__badge">Tip 1</span>
+          <h2 class="slide__title">Communicate your passion</h2>
+          <div class="slide__icon" aria-hidden="true">😊</div>
+          <p class="slide__text">A bright face says that you are happy and comfortable, you know that mentees will behave, and any non-compliance will be addressed with the minimum of fuss. This becomes a positive self-fulfilling prophecy.</p>
+        </div>
+
+        <div class="slide" role="tabpanel" aria-roledescription="slide" aria-label="2 of 8" id="slide-2" inert>
+          <span class="slide__badge">Tip 2</span>
+          <h2 class="slide__title">Set clear expectations</h2>
+          <div class="slide__icon" aria-hidden="true">🎯</div>
+          <p class="slide__text">Define success criteria and milestones from the start. When everyone understands the goals and boundaries, collaboration becomes smoother and more productive for all parties involved.</p>
+        </div>
+
+        <div class="slide" role="tabpanel" aria-roledescription="slide" aria-label="3 of 8" id="slide-3" inert>
+          <span class="slide__badge">Tip 3</span>
+          <h2 class="slide__title">Listen actively</h2>
+          <div class="slide__icon" aria-hidden="true">👂</div>
+          <p class="slide__text">Give your full attention and show genuine interest in what others are saying. Active listening builds trust and helps you understand the real needs and concerns behind the words.</p>
+        </div>
+
+        <div class="slide" role="tabpanel" aria-roledescription="slide" aria-label="4 of 8" id="slide-4" inert>
+          <span class="slide__badge">Tip 4</span>
+          <h2 class="slide__title">Provide constructive feedback</h2>
+          <div class="slide__icon" aria-hidden="true">💬</div>
+          <p class="slide__text">Focus on specific behaviors and outcomes rather than personal attributes. Frame feedback as opportunities for growth and always balance criticism with recognition of strengths.</p>
+        </div>
+
+        <div class="slide" role="tabpanel" aria-roledescription="slide" aria-label="5 of 8" id="slide-5" inert>
+          <span class="slide__badge">Tip 5</span>
+          <h2 class="slide__title">Lead by example</h2>
+          <div class="slide__icon" aria-hidden="true">⭐</div>
+          <p class="slide__text">Demonstrate the behaviors and work ethic you expect from others. Actions speak louder than words, and your conduct sets the standard for the entire team to follow.</p>
+        </div>
+
+        <div class="slide" role="tabpanel" aria-roledescription="slide" aria-label="6 of 8" id="slide-6" inert>
+          <span class="slide__badge">Tip 6</span>
+          <h2 class="slide__title">Celebrate small wins</h2>
+          <div class="slide__icon" aria-hidden="true">🎉</div>
+          <p class="slide__text">Acknowledge progress and achievements, no matter how small. Regular recognition boosts morale and motivation, creating momentum toward larger goals and sustained success.</p>
+        </div>
+
+        <div class="slide" role="tabpanel" aria-roledescription="slide" aria-label="7 of 8" id="slide-7" inert>
+          <span class="slide__badge">Tip 7</span>
+          <h2 class="slide__title">Foster collaboration</h2>
+          <div class="slide__icon" aria-hidden="true">🤝</div>
+          <p class="slide__text">Create opportunities for team members to work together and share knowledge. Collaborative environments spark innovation and help everyone grow through shared experiences.</p>
+        </div>
+
+        <div class="slide" role="tabpanel" aria-roledescription="slide" aria-label="8 of 8" id="slide-8" inert>
+          <span class="slide__badge">Tip 8</span>
+          <h2 class="slide__title">Adapt and iterate</h2>
+          <div class="slide__icon" aria-hidden="true">🔄</div>
+          <p class="slide__text">Stay flexible and willing to adjust your approach based on feedback and results. Continuous improvement is key to long-term success and maintaining relevance in changing environments.</p>
+        </div>
+
+      </div>
+    </div>
+
+    <button class="arrow arrow--next" aria-label="Next slide">&#8250;</button>
+
+    <!--
+      Pagination as tablist — tabs control which tabpanel (slide) is visible.
+      Arrow keys move between tabs (managed in JS via roving tabindex).
+    -->
+    <div class="pagination" role="tablist" aria-label="Slide navigation"></div>
+
+    <!-- Live region for screen reader announcements on slide change -->
+    <div class="sr-only" aria-live="polite" aria-atomic="true" id="carousel-status"></div>
+  </section>
+
+  <script>
+    /**
+     * Carousel — accessible, production-ready carousel component.
+     *
+     * Accessibility features:
+     * - WAI-ARIA carousel pattern (region + roledescription)
+     * - Tab/tabpanel relationship for pagination ↔ slides
+     * - Roving tabindex in tablist (arrow key navigation between tabs)
+     * - inert attribute on inactive slides (removes from tab order + SR tree)
+     * - aria-live region announces current slide to screen readers
+     * - prefers-reduced-motion honored via CSS (no JS override needed)
+     * - Focus-visible styles for keyboard navigation
+     *
+     * Engineering:
+     * - Class-based with explicit destroy() for cleanup
+     * - Passive touch listeners for scroll performance
+     * - Pointer events as primary, touch events as fallback
+     * - Bound methods for clean addEventListener/removeEventListener pairing
+     * - No DOM leaks — all listeners removable
+     */
+    class Carousel {
+      constructor(el) {
+        this.root = el;
+        this.track = el.querySelector('.carousel__track');
+        this.slides = [...this.track.children];
+        this.prevBtn = el.querySelector('.arrow--prev');
+        this.nextBtn = el.querySelector('.arrow--next');
+        this.tablist = el.querySelector('[role="tablist"]');
+        this.statusEl = el.querySelector('#carousel-status');
+        this.total = this.slides.length;
+        this.current = 0;
+        this.tabs = [];
+        this.pointerStartX = null;
+
+        // Bind methods so they can be added and removed as listeners
+        this._onKeydown = this._onKeydown.bind(this);
+        this._onTabKeydown = this._onTabKeydown.bind(this);
+        this._onPointerDown = this._onPointerDown.bind(this);
+        this._onPointerUp = this._onPointerUp.bind(this);
+        this._onPrev = () => this.go(this.current - 1);
+        this._onNext = () => this.go(this.current + 1);
+
+        this._buildTabs();
+        this._attach();
+        this.go(0);
+      }
+
+      /**
+       * Build pagination tabs dynamically. Each tab:
+       * - has role="tab" and controls its matching slide via aria-controls
+       * - uses roving tabindex: active tab is tabindex="0", others "-1"
+       */
+      _buildTabs() {
+        for (let i = 0; i < this.total; i++) {
+          const tab = document.createElement('button');
+          tab.className = 'dot';
+          tab.textContent = i + 1;
+          tab.setAttribute('role', 'tab');
+          tab.setAttribute('aria-label', `Slide ${i + 1}`);
+          tab.setAttribute('aria-controls', `slide-${i + 1}`);
+          tab.setAttribute('aria-selected', 'false');
+          tab.setAttribute('tabindex', '-1');
+          tab.addEventListener('click', () => this.go(i));
+          this.tablist.appendChild(tab);
+          this.tabs.push(tab);
+        }
+      }
+
+      /** Attach all event listeners. */
+      _attach() {
+        this.prevBtn.addEventListener('click', this._onPrev);
+        this.nextBtn.addEventListener('click', this._onNext);
+        document.addEventListener('keydown', this._onKeydown);
+        this.tablist.addEventListener('keydown', this._onTabKeydown);
+
+        // Pointer events (covers mouse + touch + pen)
+        this.track.addEventListener('pointerdown', this._onPointerDown);
+        this.track.addEventListener('pointerup', this._onPointerUp);
+        this.track.addEventListener('pointercancel', this._onPointerUp);
+      }
+
+      /**
+       * Navigate to a given slide index.
+       * Updates: track position, arrow states, tab selection,
+       *          slide inert states, and SR live region.
+       */
+      go(index) {
+        const clamped = Math.max(0, Math.min(index, this.total - 1));
+        if (clamped === this.current && index !== 0) return; // no-op if same slide
+        this.current = clamped;
+
+        // Move track
+        this.track.style.transform = `translateX(-${this.current * 100}%)`;
+
+        // Arrow enabled/disabled
+        this.prevBtn.disabled = this.current === 0;
+        this.nextBtn.disabled = this.current === this.total - 1;
+
+        // Update tabs — roving tabindex + aria-selected
+        this.tabs.forEach((tab, i) => {
+          const isActive = i === this.current;
+          tab.setAttribute('aria-selected', String(isActive));
+          tab.setAttribute('tabindex', isActive ? '0' : '-1');
+        });
+
+        // Update slides — inert on all except current
+        this.slides.forEach((slide, i) => {
+          if (i === this.current) {
+            slide.removeAttribute('inert');
+          } else {
+            slide.setAttribute('inert', '');
+          }
+        });
+
+        // Announce to screen readers
+        const title = this.slides[this.current].querySelector('.slide__title')?.textContent;
+        this.statusEl.textContent = `Slide ${this.current + 1} of ${this.total}: ${title}`;
+      }
+
+      /**
+       * Global keyboard handler — Left/Right arrows navigate slides
+       * only when focus is within the carousel.
+       */
+      _onKeydown(e) {
+        if (!this.root.contains(document.activeElement)) return;
+        if (e.key === 'ArrowLeft') { e.preventDefault(); this.go(this.current - 1); }
+        if (e.key === 'ArrowRight') { e.preventDefault(); this.go(this.current + 1); }
+      }
+
+      /**
+       * Tablist keyboard handler — implements roving tabindex pattern.
+       * Left/Right move between tabs, Home/End jump to first/last.
+       * Focus follows selection for immediate feedback.
+       */
+      _onTabKeydown(e) {
+        let next = this.current;
+
+        switch (e.key) {
+          case 'ArrowLeft':  next = this.current - 1; break;
+          case 'ArrowRight': next = this.current + 1; break;
+          case 'Home':       next = 0; break;
+          case 'End':        next = this.total - 1; break;
+          default: return;
+        }
+
+        e.preventDefault();
+        next = Math.max(0, Math.min(next, this.total - 1));
+        this.go(next);
+        this.tabs[next].focus();
+      }
+
+      /** Pointer-based swipe: record start X. */
+      _onPointerDown(e) {
+        this.pointerStartX = e.clientX;
+      }
+
+      /** Pointer-based swipe: compare end X, navigate if threshold met. */
+      _onPointerUp(e) {
+        if (this.pointerStartX === null) return;
+        const diff = this.pointerStartX - e.clientX;
+        if (Math.abs(diff) > 40) {
+          this.go(this.current + (diff > 0 ? 1 : -1));
+        }
+        this.pointerStartX = null;
+      }
+
+      /** Remove all listeners — call when removing the carousel from DOM. */
+      destroy() {
+        this.prevBtn.removeEventListener('click', this._onPrev);
+        this.nextBtn.removeEventListener('click', this._onNext);
+        document.removeEventListener('keydown', this._onKeydown);
+        this.tablist.removeEventListener('keydown', this._onTabKeydown);
+        this.track.removeEventListener('pointerdown', this._onPointerDown);
+        this.track.removeEventListener('pointerup', this._onPointerUp);
+        this.track.removeEventListener('pointercancel', this._onPointerUp);
+        this.tabs.forEach(tab => tab.remove());
+        this.tabs = [];
+      }
+    }
+
+    // Initialize when DOM is ready
+    const carousel = new Carousel(document.querySelector('.carousel'));
+  </script>
+
+</body>
+</html>

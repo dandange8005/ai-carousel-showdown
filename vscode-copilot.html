@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Process Tips Carousel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #16a085;
+            --text-dark: #2c3e50;
+            --text-light: #555;
+            --bg-light: #f8f9fa;
+            --white: #ffffff;
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .carousel-container {
+            max-width: 800px;
+            width: 100%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .carousel-wrapper {
+            flex: 1;
+            overflow: hidden;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .carousel-track {
+            display: flex;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .carousel-slide {
+            min-width: 100%;
+            background: var(--white);
+            padding: 60px 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .tip-badge {
+            background: var(--primary-color);
+            color: var(--white);
+            padding: 8px 24px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .slide-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 40px;
+            line-height: 1.2;
+        }
+
+        .slide-icon {
+            width: 150px;
+            height: 150px;
+            margin-bottom: 40px;
+            font-size: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide-description {
+            font-size: 16px;
+            line-height: 1.7;
+            color: var(--text-light);
+            max-width: 500px;
+        }
+
+        .nav-button {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: var(--text-dark);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px var(--shadow);
+            flex-shrink: 0;
+        }
+
+        .nav-button:hover {
+            background: var(--white);
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px var(--shadow);
+        }
+
+        .nav-button:active {
+            transform: scale(0.95);
+        }
+
+        .nav-button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            transform: scale(1);
+        }
+
+        .carousel-pagination {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 30px;
+        }
+
+        .pagination-dot {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.6);
+            border: 2px solid transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-dark);
+            transition: all 0.3s ease;
+        }
+
+        .pagination-dot:hover {
+            background: rgba(255, 255, 255, 0.8);
+            transform: scale(1.1);
+        }
+
+        .pagination-dot.active {
+            background: var(--white);
+            border-color: var(--primary-color);
+            transform: scale(1.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .carousel-slide {
+                padding: 40px 30px;
+            }
+
+            .slide-title {
+                font-size: 24px;
+            }
+
+            .slide-icon {
+                width: 100px;
+                height: 100px;
+                font-size: 80px;
+            }
+
+            .nav-button {
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
+            }
+
+            .pagination-dot {
+                width: 32px;
+                height: 32px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="carousel-container">
+        <button class="nav-button prev-btn" aria-label="Previous slide">&#8249;</button>
+        
+        <div>
+            <div class="carousel-wrapper">
+                <div class="carousel-track" id="carouselTrack">
+                    <!-- Slide 1 -->
+                    <div class="carousel-slide">
+                        <div class="tip-badge">Tip 1</div>
+                        <h2 class="slide-title">Communicate your passion</h2>
+                        <div class="slide-icon">😊</div>
+                        <p class="slide-description">
+                            A bright face says that you are happy and comfortable, you know that 
+                            mentees will behave, and any non-compliance will be addressed with the 
+                            minimum of fuss. This becomes a positive self-fulfilling prophecy.
+                        </p>
+                    </div>
+
+                    <!-- Slide 2 -->
+                    <div class="carousel-slide">
+                        <div class="tip-badge">Tip 2</div>
+                        <h2 class="slide-title">Set clear expectations</h2>
+                        <div class="slide-icon">🎯</div>
+                        <p class="slide-description">
+                            Define success criteria and milestones from the start. When everyone 
+                            understands the goals and boundaries, collaboration becomes smoother 
+                            and more productive for all parties involved.
+                        </p>
+                    </div>
+
+                    <!-- Slide 3 -->
+                    <div class="carousel-slide">
+                        <div class="tip-badge">Tip 3</div>
+                        <h2 class="slide-title">Listen actively</h2>
+                        <div class="slide-icon">👂</div>
+                        <p class="slide-description">
+                            Give your full attention and show genuine interest in what others are 
+                            saying. Active listening builds trust and helps you understand the real 
+                            needs and concerns behind the words.
+                        </p>
+                    </div>
+
+                    <!-- Slide 4 -->
+                    <div class="carousel-slide">
+                        <div class="tip-badge">Tip 4</div>
+                        <h2 class="slide-title">Provide constructive feedback</h2>
+                        <div class="slide-icon">💬</div>
+                        <p class="slide-description">
+                            Focus on specific behaviors and outcomes rather than personal 
+                            attributes. Frame feedback as opportunities for growth and always 
+                            balance criticism with recognition of strengths.
+                        </p>
+                    </div>
+
+                    <!-- Slide 5 -->
+                    <div class="carousel-slide">
+                        <div class="tip-badge">Tip 5</div>
+                        <h2 class="slide-title">Lead by example</h2>
+                        <div class="slide-icon">⭐</div>
+                        <p class="slide-description">
+                            Demonstrate the behaviors and work ethic you expect from others. 
+                            Actions speak louder than words, and your conduct sets the standard 
+                            for the entire team to follow.
+                        </p>
+                    </div>
+
+                    <!-- Slide 6 -->
+                    <div class="carousel-slide">
+                        <div class="tip-badge">Tip 6</div>
+                        <h2 class="slide-title">Celebrate small wins</h2>
+                        <div class="slide-icon">🎉</div>
+                        <p class="slide-description">
+                            Acknowledge progress and achievements, no matter how small. Regular 
+                            recognition boosts morale and motivation, creating momentum toward 
+                            larger goals and sustained success.
+                        </p>
+                    </div>
+
+                    <!-- Slide 7 -->
+                    <div class="carousel-slide">
+                        <div class="tip-badge">Tip 7</div>
+                        <h2 class="slide-title">Foster collaboration</h2>
+                        <div class="slide-icon">🤝</div>
+                        <p class="slide-description">
+                            Create opportunities for team members to work together and share 
+                            knowledge. Collaborative environments spark innovation and help 
+                            everyone grow through shared experiences.
+                        </p>
+                    </div>
+
+                    <!-- Slide 8 -->
+                    <div class="carousel-slide">
+                        <div class="tip-badge">Tip 8</div>
+                        <h2 class="slide-title">Adapt and iterate</h2>
+                        <div class="slide-icon">🔄</div>
+                        <p class="slide-description">
+                            Stay flexible and willing to adjust your approach based on feedback 
+                            and results. Continuous improvement is key to long-term success and 
+                            maintaining relevance in changing environments.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="carousel-pagination" id="pagination"></div>
+        </div>
+
+        <button class="nav-button next-btn" aria-label="Next slide">&#8250;</button>
+    </div>
+
+    <script>
+        class Carousel {
+            constructor() {
+                this.track = document.getElementById('carouselTrack');
+                this.slides = this.track.querySelectorAll('.carousel-slide');
+                this.prevBtn = document.querySelector('.prev-btn');
+                this.nextBtn = document.querySelector('.next-btn');
+                this.pagination = document.getElementById('pagination');
+                this.currentIndex = 0;
+                this.totalSlides = this.slides.length;
+
+                this.init();
+            }
+
+            init() {
+                this.createPagination();
+                this.updateCarousel();
+                this.attachEvents();
+            }
+
+            createPagination() {
+                for (let i = 0; i < this.totalSlides; i++) {
+                    const dot = document.createElement('button');
+                    dot.classList.add('pagination-dot');
+                    dot.textContent = i + 1;
+                    dot.setAttribute('aria-label', `Go to slide ${i + 1}`);
+                    dot.addEventListener('click', () => this.goToSlide(i));
+                    this.pagination.appendChild(dot);
+                }
+            }
+
+            updateCarousel() {
+                // Update track position
+                const offset = -this.currentIndex * 100;
+                this.track.style.transform = `translateX(${offset}%)`;
+
+                // Update pagination
+                const dots = this.pagination.querySelectorAll('.pagination-dot');
+                dots.forEach((dot, index) => {
+                    dot.classList.toggle('active', index === this.currentIndex);
+                });
+
+                // Update navigation buttons
+                this.prevBtn.disabled = this.currentIndex === 0;
+                this.nextBtn.disabled = this.currentIndex === this.totalSlides - 1;
+            }
+
+            goToSlide(index) {
+                if (index >= 0 && index < this.totalSlides) {
+                    this.currentIndex = index;
+                    this.updateCarousel();
+                }
+            }
+
+            nextSlide() {
+                this.goToSlide(this.currentIndex + 1);
+            }
+
+            prevSlide() {
+                this.goToSlide(this.currentIndex - 1);
+            }
+
+            attachEvents() {
+                this.prevBtn.addEventListener('click', () => this.prevSlide());
+                this.nextBtn.addEventListener('click', () => this.nextSlide());
+
+                // Keyboard navigation
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'ArrowLeft') this.prevSlide();
+                    if (e.key === 'ArrowRight') this.nextSlide();
+                });
+
+                // Touch/swipe support
+                let touchStartX = 0;
+                let touchEndX = 0;
+
+                this.track.addEventListener('touchstart', (e) => {
+                    touchStartX = e.changedTouches[0].screenX;
+                });
+
+                this.track.addEventListener('touchend', (e) => {
+                    touchEndX = e.changedTouches[0].screenX;
+                    this.handleSwipe();
+                });
+
+                const handleSwipe = () => {
+                    const swipeThreshold = 50;
+                    const diff = touchStartX - touchEndX;
+
+                    if (Math.abs(diff) > swipeThreshold) {
+                        if (diff > 0) {
+                            this.nextSlide();
+                        } else {
+                            this.prevSlide();
+                        }
+                    }
+                };
+
+                this.handleSwipe = handleSwipe;
+            }
+        }
+
+        // Initialize carousel when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            new Carousel();
+        });
+    </script>
+</body>
+</html>
